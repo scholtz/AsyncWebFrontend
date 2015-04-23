@@ -49,3 +49,8 @@ server {
 
 4) Set up project
 Set up your settings.php file. Use settings.example.php as example usage file.
+
+5) To upgrade project do the following:
+```bash
+git pull origin develop
+```
