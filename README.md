@@ -5,7 +5,8 @@ Installation:
 1) Install composer
 ```bash
 curl -sS https://getcomposer.org/installer | php
-mv composer.phar /usr/local/bin/composer```
+mv composer.phar /usr/local/bin/composer
+```
 
 2) Install project
 ```bash
