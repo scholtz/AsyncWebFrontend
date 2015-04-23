@@ -65,7 +65,7 @@ function showMenuBox(tableid, menuboxpath){
 
 function applyFilterBox(tableid, colid, filterboxpath){
 	var data = $("#form_"+tableid).serialize();
-	TSLoad("filterbox_"+colid,filterboxpath,true,data);
-	$("#filterbox_"+colid).toggle();
+	TSLoad("filterbox_"+tableid+"_"+colid,filterboxpath,true,data);
+	$("#filterbox_"+tableid+"_"+colid).toggle();
 	return false;//do not execute a href click
 }

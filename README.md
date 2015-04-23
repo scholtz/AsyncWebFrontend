@@ -69,5 +69,5 @@ You can alternativly use the web setup.
 
 6) To upgrade project do the following:
 ```bash
-git pull origin develop
+git pull origin master
 ```
