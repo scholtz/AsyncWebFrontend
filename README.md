@@ -13,17 +13,24 @@ mv composer.phar /usr/local/bin/composer
 mkdir /srv/www/vhosts/MyProject
 cd /srv/www/vhosts/MyProject
 git clone https://github.com/scholtz/AsyncWebFrontend.git
+cd /srv/www/vhosts/MyProject/AsyncWebFrontend
 composer update
 ```
 
-3) Set up webserver
+3) Set permissions 
+```bash
+chown -R www-data .
+find . -type d -exec chmod 700 {} \; && find . -type f -exec chmod 600 {} \;
+```
+
+4) Set up webserver
 then add path your virtual host for the domain in Apache, Nginx, or other webserver to /srv/www/vhosts/MyApp/htdocs
 
 For example:
 ```
 server {
 
-	root /srv/www/vhosts/MyProject/htdocs;
+	root /srv/www/vhosts/MyProject/AsyncWebFrontend/htdocs;
 	index index.html index.php;
 
 	server_name www.myproject.com ru.myproject.com;
@@ -48,10 +55,19 @@ server {
 }
 ```
 
-4) Set up project
+Do not forget to reload apache or nginx, for example: 
+```
+nginx -t 				# test nginx config
+service nginx reload 	# reload nginx config
+```
+
+
+5) Set up project
 Set up your settings.php file. Use settings.example.php as example usage file.
 
-5) To upgrade project do the following:
+You can alternativly use the web setup.
+
+6) To upgrade project do the following:
 ```bash
 git pull origin develop
 ```
