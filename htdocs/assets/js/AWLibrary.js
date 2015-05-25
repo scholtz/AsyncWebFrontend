@@ -1,17 +1,19 @@
-/* MeteorDdp - a client for DDP version pre1 */
+/* DDP - a client for DDP version pre1 */
 
-var MeteorDdp = function(wsUri) {
+var DDP = function() {
   this.VERSIONS = ["pre1"];
-
-  this.wsUri = wsUri;
   this.sock;
   this.defs = {};         // { deferred_id => deferred_object }
   this.subs = {};         // { pub_name => deferred_id }
   this.watchers = {};     // { coll_name => [cb1, cb2, ...] }
   this.collections = {};  // { coll_name => {docId => {doc}, docId => {doc}, ...} }
+  this.useSSL = false;
+  this.domain = window.location.host;
+  this.port = 3001;
+  this.connectUri = "/websocket";
 };
 
-MeteorDdp.prototype._Ids = function() {
+DDP.prototype._Ids = function() {
   var count = 0;
   return {
     next: function() {
@@ -20,11 +22,21 @@ MeteorDdp.prototype._Ids = function() {
   }
 }();
 
-MeteorDdp.prototype.connect = function() {
+DDP.prototype.connect = function() {
   var self = this;
   var conn = new $.Deferred();
 
-  self.sock = new ReconnectingWebSocket(self.wsUri);
+  var addr = "";
+  if(this.useSSL){
+	  addr+='ws://';
+  }else{
+	  addr+='wss://';
+  }
+  addr+= this.domain;
+  addr+= ":";
+  addr+= this.port+this.connectUri;
+  
+  self.sock = new ReconnectingWebSocket(addr);
 
   self.sock.onopen = function() {
     self.send({
@@ -85,7 +97,7 @@ MeteorDdp.prototype.connect = function() {
   return conn.promise();
 };
 
-MeteorDdp.prototype._resolveNoSub = function(data) {
+DDP.prototype._resolveNoSub = function(data) {
   if (data.error) {
     var error = data.error;
     this.defs[data.id].reject(error.reason || 'Subscription not found');
@@ -94,7 +106,7 @@ MeteorDdp.prototype._resolveNoSub = function(data) {
   }
 };
 
-MeteorDdp.prototype._resolvePing = function(data) {
+DDP.prototype._resolvePing = function(data) {
 	//alert("received ping");
   var self = this;
   //alert(JSON.stringify(data));
@@ -104,7 +116,7 @@ MeteorDdp.prototype._resolvePing = function(data) {
     });
   
 };
-MeteorDdp.prototype._resolveCall = function(data) {
+DDP.prototype._resolveCall = function(data) {
   if (data.error) {
     this.defs[data.id].reject(data.error.reason);
   } else if (typeof data.result !== 'undefined') {
@@ -112,14 +124,14 @@ MeteorDdp.prototype._resolveCall = function(data) {
   }
 };
 
-MeteorDdp.prototype._resolveSubs = function(data) {
+DDP.prototype._resolveSubs = function(data) {
   var subIds = data.subs;
   for (var i = 0; i < subIds.length; i++) {
     this.defs[subIds[i]].resolve();
   }
 };
 
-MeteorDdp.prototype._changeDoc = function(msg) {
+DDP.prototype._changeDoc = function(msg) {
 	//alert(JSON.stringify(msg));
   if(msg.changed.template != undefined){
     //alert(RTemplate.data[msg.changed.template][msg.changed.tid]);
@@ -149,7 +161,7 @@ MeteorDdp.prototype._changeDoc = function(msg) {
   this._notifyWatchers(collName, changedDoc, id, msg.msg);
 };
 
-MeteorDdp.prototype._addDoc = function(msg) {
+DDP.prototype._addDoc = function(msg) {
   var collName = msg.collection;
   var id = msg.id;
   if (!this.collections[collName]) {
@@ -164,7 +176,7 @@ MeteorDdp.prototype._addDoc = function(msg) {
   this._notifyWatchers(collName, changedDoc, id, msg.msg);
 };
 
-MeteorDdp.prototype._removeDoc = function(msg) {
+DDP.prototype._removeDoc = function(msg) {
   var collName = msg.collection;
   var id = msg.id;
   var doc = this.collections[collName][id];
@@ -174,7 +186,7 @@ MeteorDdp.prototype._removeDoc = function(msg) {
   this._notifyWatchers(collName, docCopy, id, msg.msg);
 };
 
-MeteorDdp.prototype._notifyWatchers = function(collName, changedDoc, docId, message) {
+DDP.prototype._notifyWatchers = function(collName, changedDoc, docId, message) {
   changedDoc = JSON.parse(JSON.stringify(changedDoc)); // make a copy
   changedDoc._id = docId; // id might be useful to watchers, attach it.
 
@@ -187,7 +199,7 @@ MeteorDdp.prototype._notifyWatchers = function(collName, changedDoc, docId, mess
   }
 };
 
-MeteorDdp.prototype._deferredSend = function(actionType, name, params) {
+DDP.prototype._deferredSend = function(actionType, name, params) {
   var id = this._Ids.next();
   this.defs[id] = new $.Deferred();
 
@@ -210,15 +222,15 @@ MeteorDdp.prototype._deferredSend = function(actionType, name, params) {
   return this.defs[id].promise();
 };
 
-MeteorDdp.prototype.call = function(methodName, params) {
+DDP.prototype.call = function(methodName, params) {
   return this._deferredSend('method', methodName, params);
 };
 
-MeteorDdp.prototype.subscribe = function(pubName, params) {
+DDP.prototype.subscribe = function(pubName, params) {
   return this._deferredSend('sub', pubName, params);
 };
 
-MeteorDdp.prototype.unsubscribe = function(pubName) {
+DDP.prototype.unsubscribe = function(pubName) {
   this.defs[id] = new $.Deferred();
   if (!this.subs[pubName]) {
     this.defs[id].reject(pubName + " was never subscribed");
@@ -233,26 +245,26 @@ MeteorDdp.prototype.unsubscribe = function(pubName) {
   return this.defs[id].promise();
 };
 
-MeteorDdp.prototype.watch = function(collectionName, cb) {
+DDP.prototype.watch = function(collectionName, cb) {
   if (!this.watchers[collectionName]) {
     this.watchers[collectionName] = [];
   }
   this.watchers[collectionName].push(cb);
 };
 
-MeteorDdp.prototype.getCollection = function(collectionName) {
+DDP.prototype.getCollection = function(collectionName) {
   return this.collections[collectionName] || null;
 }
 
-MeteorDdp.prototype.getDocument = function(collectionName, docId) {
+DDP.prototype.getDocument = function(collectionName, docId) {
   return this.collections[collectionName][docId] || null;
 }
 
-MeteorDdp.prototype.send = function(msg) {
+DDP.prototype.send = function(msg) {
   this.sock.send(JSON.stringify(msg));
 };
 
-MeteorDdp.prototype.close = function() {
+DDP.prototype.close = function() {
   this.sock.close();
 };
 
@@ -341,22 +353,6 @@ MeteorDdp.prototype.close = function() {
 					item = URLParser.get(item,url);
 					ret[key] = templateid;
 					
-					/*
-					var merge = {};
-					var p = item.indexOf(":");
-					itemid = item;
-					if(p > 0){
-						itemid = item.substring(0,p);
-					}
-					item = URLParser.get(item,url);
-					if(itemid != item){
-						merge = rtemplate.getUsedTemplates("/"+itemid+":"+item);
-					}else{
-						merge = rtemplate.getUsedTemplates("/"+item);
-					}
-					for(var key in merge){
-						ret[key] = merge[key];
-					}/**/
 				}
 			}
 		}
@@ -440,7 +436,7 @@ MeteorDdp.prototype.close = function() {
 			}).fail(function(err) {
 			
 				rtemplate.render2(url);
-				alert("template error 0x91859");
+				//alert("template error 0x91859");
 			});
 		}else{
 			if(!rtemplate.checkTemplate(templateid,url)) done = false;
@@ -672,32 +668,14 @@ MeteorDdp.prototype.close = function() {
 
 $(document).ready(function(){
 
-ddp = new MeteorDdp('ws://www.jobler.cz:3001/websocket');
-
-ddp.connect().done(function() {
-
-});
+	ddp = new DDP();
+	ddp.connect().done(function() {});
 
 	RTemplate.track();
 	
 	if(parent.location.hash != null){
 		url = parent.location.hash.substring(1);
 		RTemplate.render2(url);
-		/*
-		atr = url.split("/");
-		
-		templateid = atr[1];
-		target = "";
-		for(i=0;i<atr.length;i++){
-			if(atr[i].indexOf(":") > -1){
-				split = atr[i].split(":");
-				templateid = split[1];
-				target = split[0];
-			}
-		}
-		if(target){
-			RTemplate.render(templateid,url,target);
-		}/**/
 	}
 	
 });
