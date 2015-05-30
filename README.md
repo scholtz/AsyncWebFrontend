@@ -14,13 +14,17 @@ mkdir /srv/www/vhosts/MyProject
 cd /srv/www/vhosts/MyProject
 git clone https://github.com/scholtz/AsyncWebFrontend.git
 cd /srv/www/vhosts/MyProject/AsyncWebFrontend
+cp composer.json.default composer.json
 composer update
 ```
 
 3) Set permissions 
 ```bash
-chown -R www-data .
-find . -type d -exec chmod 700 {} \; && find . -type f -exec chmod 600 {} \;
+chown -R www-data:users .
+# or
+chown -R user:www-data .
+
+find . -type d -exec chmod 770 {} \; && find . -type f -exec chmod 660 {} \;
 ```
 
 4) Set up webserver
@@ -69,5 +73,7 @@ You can alternativly use the web setup.
 
 6) To upgrade project do the following:
 ```bash
-git pull origin master
+git fetch origin master
+git reset --hard FETCH_HEAD
+git clean -df
 ```
