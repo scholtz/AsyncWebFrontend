@@ -77,7 +77,22 @@
     }
      
 }
-     @media(max-width:767px) {
+
+
+ @media(min-width:1670px) {
+     .page-content-wrapper{
+        margin: 0 auto;
+        
+    }
+	
+	
+    .navbar-side {
+        z-index: 1;
+        position: absolute;
+        width: 260px;
+    }
+     
+}     @media(max-width:767px) {
    
   
 		.navbar {

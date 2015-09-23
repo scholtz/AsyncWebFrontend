@@ -5,8 +5,9 @@
 
 try{
 	require '../vendor/autoload.php';
-
-	if(file_exists("../conf/settings.php")){
+	if($_SERVER['APPLICATION_ENV'] && file_exists($f="../conf/".$_SERVER['APPLICATION_ENV']."/settings.php")){
+		require_once($f);
+	}elseif(file_exists("../conf/settings.php")){
 		require_once("../conf/settings.php");
 	}elseif(file_exists("settings.php")){
 		require_once("settings.php");
@@ -18,4 +19,3 @@ try{
 }catch(\Exception $exc){
 	echo "Exception: ".$exc->getMessage();
 }
-?>
