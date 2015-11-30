@@ -101,3 +101,16 @@
 	}
     
 }
+
+.navbar {
+	 margin-bottom: 0px!important; 
+  border-radius: 0 !important;
+  -moz-border-radius: 0 !important;
+}
+header{
+  border-radius: 0 !important;
+  -moz-border-radius: 0 !important;
+}
+.menutext .fa{
+	padding-right: 5px;
+}
