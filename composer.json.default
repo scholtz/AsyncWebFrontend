@@ -21,12 +21,6 @@
             "MyApp": "src"
         }
     }
-  , "repositories": [
-        {
-            "type": "git",
-            "url": "https://github.com/scholtz/AsyncWeb"
-        }
-    ]
   , "require": {
         "scholtz/async-web": "dev-master",
 		"scholtz/bootstrap-php" : "dev-master",
