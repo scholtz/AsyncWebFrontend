@@ -28,7 +28,7 @@
         }
     ]
   , "require": {
-        "scholtz/async-web": "dev01",
+        "scholtz/async-web": "dev-master",
 		"scholtz/bootstrap-php" : "dev-master",
 		"mustache/mustache" : "~2.5"
     }
