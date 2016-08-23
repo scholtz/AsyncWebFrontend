@@ -13,7 +13,7 @@ mv composer.phar /usr/local/bin/composer
 mkdir /srv/www/vhosts/MyProject
 cd /srv/www/vhosts/MyProject
 git clone https://github.com/scholtz/AsyncWebFrontend.git
-cd /srv/www/vhosts/MyProject/AsyncWebFrontend
+cd AsyncWebFrontend
 cp composer.json.default composer.json
 composer update
 ```
