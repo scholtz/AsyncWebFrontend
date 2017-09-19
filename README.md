@@ -79,3 +79,11 @@ git fetch origin master
 git reset --hard FETCH_HEAD
 git clean -df
 ```
+7) Bower
+It is recomended to use bower for distribution of javascript libraries
+```bash
+cd htdocs
+bower install jquery
+bower install bootstrap
+bower install font-awesome
+```
