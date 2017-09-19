@@ -4,6 +4,9 @@
 /**/
 
 try{
+	if(!file_exists('../vendor/autoload.php')) {
+		throw new \Exception("Autoload is missing. Please run command 'composer update'");
+	} 
 	require '../vendor/autoload.php';
 	if($_SERVER['APPLICATION_ENV'] && file_exists($f="../conf/".$_SERVER['APPLICATION_ENV']."/settings.php")){
 		require_once($f);
